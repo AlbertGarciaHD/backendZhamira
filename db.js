@@ -16,4 +16,3 @@ module.exports = pool;
 // git commit -m "fix: conexión a la base de datos"
 // git push origin main
 
-//postgresql://bd_zhamira_user:0esTpEmP6XrPiFBZQ2lRjVwZEYR78Vmn@dpg-d1oiv07diees73cij9hg-a/bd_zhamira

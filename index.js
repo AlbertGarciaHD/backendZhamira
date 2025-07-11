@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const db = require("./db");
+const { generarKey } = require("./helpers");
 
 app.use(cors());
 app.use(express.json());
@@ -29,6 +30,91 @@ app.get("/crear-tabla", async (req, res) => {
     res.status(500).send("Error al crear la tabla 5");
   }
 });
+
+app.get("/articulos", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM articulos");
+
+    // Añadir campo "disabled" en base a "disponible"
+    const articulos = result.rows.map((art) => ({
+      ...art,
+      disabled: art.disponible === 0
+    }));
+
+    res.json(articulos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al obtener los artículos");
+  }
+});
+
+app.post("/articulos", async (req, res) => {
+  const { nombre, cantidad, url_imagen } = req.body;
+
+  const disponible = cantidad;
+  const json_data = [];
+
+  try {
+    const result = await db.query(
+      `INSERT INTO articulos (nombre, cantidad, disponible, json_data, url_imagen)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [nombre, cantidad, disponible, json_data, url_imagen]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al crear el artículo");
+  }
+});
+
+app.put("/articulos/:id/reservar", async (req, res) => {
+  const { id } = req.params;
+  const { usuario, cantidad } = req.body;
+
+  try {
+    // 1. Obtener el artículo actual
+    const result = await db.query("SELECT * FROM articulos WHERE id = $1", [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Artículo no encontrado");
+    }
+
+    const articulo = result.rows[0];
+
+    if (articulo.disponible === 0 ) {
+      return res.status(400).send("No hay suficiente disponibilidad");
+    }
+
+    // 2. Actualizar json_data con el nuevo usuario
+    const jsonData = articulo.json_data || {};
+    const key = generarKey(articulo.id, usuario);
+
+    if (jsonData[key]) {
+      jsonData[key] = { 
+        ...jsonData[key],
+        cantidad: jsonData[key].cantidad + 1
+      };
+    } else {
+      jsonData[key] = { usuario, cantidad };
+    }
+
+    const nuevoDisponible = articulo.disponible - cantidad;
+
+    // 3. Guardar cambios
+    const updateResult = await db.query(
+      `UPDATE articulos SET json_data = $1, disponible = $2 WHERE id = $3 RETURNING *`,
+      [jsonData, nuevoDisponible, id]
+    );
+
+    res.json(updateResult.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al reservar artículo");
+  }
+});
+
+
 
 
 
