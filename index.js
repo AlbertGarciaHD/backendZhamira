@@ -9,6 +9,27 @@ app.get("/", (req, res) => {
   res.send("¡Servidor activo!");
 });
 
+app.get("/crear-tabla", async (req, res) => {
+  try {
+    const query = `
+      CREATE TABLE IF NOT EXISTS articulos (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(100),
+        cantidad INTEGER,
+        disponible INTEGER,
+        json_data JSONB,
+        url_imagen VARCHAR(255)
+      )
+    `;
+    await db.query(query);
+    res.send("Tabla creada con éxito");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al crear la tabla");
+  }
+});
+
+
 app.get("/api/users", (res, req) => {
   res.send("¡Servidor activo!");
 });
