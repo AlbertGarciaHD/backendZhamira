@@ -25,7 +25,7 @@ app.get("/crear-tabla", async (req, res) => {
     res.send("Tabla creada con éxito");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error al crear la tabla");
+    res.status(500).send("Error al crear la tabla 4");
   }
 });
 
