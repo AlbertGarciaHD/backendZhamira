@@ -124,6 +124,48 @@ app.put("/articulos/:id/reservar", async (req, res) => {
   }
 });
 
+app.patch("/articulos/:id", async (req, res) => {
+  const { id } = req.params;
+  const campos = req.body;
+
+  // Validar si se envió al menos un campo
+  const keys = Object.keys(campos);
+  if (keys.length === 0) {
+    return res.status(400).send("Debe enviar al menos un campo para actualizar");
+  }
+
+  // Construir dinámicamente el SET del query
+  const setClauses = [];
+  const values = [];
+
+  keys.forEach((key, index) => {
+    setClauses.push(`${key} = $${index + 1}`);
+    values.push(campos[key]);
+  });
+
+  const query = `
+    UPDATE articulos 
+    SET ${setClauses.join(", ")} 
+    WHERE id = $${values.length + 1}
+    RETURNING *
+  `;
+
+  values.push(id); // agregar el ID al final
+
+  try {
+    const result = await db.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Artículo no encontrado");
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al actualizar el artículo: " + error.message);
+  }
+});
+
 
 
 
