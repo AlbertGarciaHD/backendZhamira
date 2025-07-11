@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const db = require("./db");
 
 app.use(cors());
 app.use(express.json());
@@ -30,9 +31,6 @@ app.get("/crear-tabla", async (req, res) => {
 });
 
 
-app.get("/api/users", (res, req) => {
-  res.send("¡Servidor activo!");
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
