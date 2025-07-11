@@ -14,9 +14,9 @@ app.get("/crear-tabla", async (req, res) => {
     const query = `
       CREATE TABLE IF NOT EXISTS articulos (
         id SERIAL PRIMARY KEY,
-        nombre VARCHAR(100),
-        cantidad INTEGER,
-        disponible INTEGER,
+        nombre VARCHAR(100) NOT NULL,
+        cantidad INTEGER NOT NULL DEFAULT 0,
+        disponible INTEGER NOT NULL DEFAULT 0,
         json_data JSONB,
         url_imagen VARCHAR(255)
       )
