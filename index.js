@@ -9,7 +9,7 @@ app.get("/", (req, res) => {
   res.send("¡Servidor activo!");
 });
 
-app.use("/api/users", (res, req) => {
+app.get("/api/users", (res, req) => {
   res.send("¡Servidor activo!");
 });
 
