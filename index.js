@@ -72,6 +72,10 @@ app.put("/articulos/:id/reservar", async (req, res) => {
   const { id } = req.params;
   const { usuario, cantidad } = req.body;
 
+  if (!usuario || !cantidad) {
+    return res.status(400).send("Faltan campos obligatorios: usuario o cantidad");
+  }
+
   try {
     // 1. Obtener el artículo actual
     const result = await db.query("SELECT * FROM articulos WHERE id = $1", [id]);
@@ -93,14 +97,20 @@ app.put("/articulos/:id/reservar", async (req, res) => {
     if (jsonData[key]) {
       jsonData[key] = { 
         ...jsonData[key],
-        cantidad: jsonData[key].cantidad + 1
+        cantidad: parseInt( jsonData[key].cantidad ) + 1
       };
     } else {
       jsonData[key] = { usuario, cantidad };
     }
 
     const nuevoDisponible = articulo.disponible - cantidad;
-
+  //  return res.json({
+  //     usuario,
+  //     cantidad,
+  //     id,
+  //     articulo,
+  //     nuevoDisponible
+  //   });
     // 3. Guardar cambios
     const updateResult = await db.query(
       `UPDATE articulos SET json_data = $1, disponible = $2 WHERE id = $3 RETURNING *`,
@@ -110,7 +120,7 @@ app.put("/articulos/:id/reservar", async (req, res) => {
     res.json(updateResult.rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error al reservar artículo");
+    res.status(500).send("Error al reservar artículo" + error.message);
   }
 });
 

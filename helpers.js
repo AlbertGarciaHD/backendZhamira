@@ -1,4 +1,9 @@
-export const generarKey = (id, nombreUsuario) => {
+// export 
+const generarKey = (id, nombreUsuario) => {
   const nombreLimpio = nombreUsuario.toLowerCase().replace(/\s+/g, "");
   return `${id}_${nombreLimpio}`;
+};
+
+module.exports = {
+  generarKey
 };
