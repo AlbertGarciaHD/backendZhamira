@@ -166,6 +166,21 @@ app.patch("/articulos/:id", async (req, res) => {
   }
 });
 
+// delte articulos 
+app.delete("/articulos/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await db.query("DELETE FROM articulos WHERE id = $1 RETURNING *", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send("Artículo no encontrado");
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al eliminar el artículo");
+  }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
